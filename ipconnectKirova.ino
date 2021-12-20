@@ -13,16 +13,10 @@
 #define ONE_WIRE_BUS 13
 #define RELE 16
 #define COUNT_CONNECT 250
-#include <SoftwareSerial.h>
-SoftwareSerial mySerial(0, 2); // RX, TX
 
 
-struct Str {
-  byte comand;
-  int button ;
-};
 
-Str buf;
+
 
 const long utcOffsetInSeconds = 14400;
 char ssid[] = "Honor 8X";
@@ -67,8 +61,8 @@ DallasTemperature tmp(&oneWire);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 DeviceAddress ADDR;
 GButton menu(10, HIGH_PULL, NORM_OPEN);
-GButton left(0, HIGH_PULL, NORM_OPEN);
-GButton right(2, HIGH_PULL, NORM_OPEN);
+GButton left(1, HIGH_PULL, NORM_OPEN);
+GButton right(3, HIGH_PULL, NORM_OPEN);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
 RTC_DS3231 rtc;
@@ -97,7 +91,7 @@ int PM_H = 20;
 int AM_M = 00;
 int PM_M = 30;
 int ust = 25;
-
+bool flag = true;
 bool WIFIerr = false;
 
 float TEMP_AM = 26;
@@ -113,7 +107,10 @@ int m = 0;
 
 void setup()
 {
-   mySerial.begin(4000);
+  pinMode(0, OUTPUT);
+  pinMode(2, OUTPUT);
+  digitalWrite(0,HIGH);
+  digitalWrite(2,HIGH);
   Wire.begin(4,5);
   Serial.begin(115200);
   WiFi.begin(ssid, pass);;
@@ -239,6 +236,10 @@ void loop() {
   
 if (millis() - tmr >= 2000) {
     tmr = millis();
+    if(flag){
+      digitalWrite(2, LOW);
+      }
+      else{digitalWrite(2, HIGH);}
 computed();
 if(!set_temp){
     main_window(TEMP3, TEMP4);
@@ -255,10 +256,7 @@ if(set_temp){
 }
 
 
-  if (mySerial.readBytes((byte*)&buf, sizeof(buf))) {
-    Serial.println(buf.comand);
-    Serial.println(buf.button);
-  }
+
 
 
 if(!WIFIerr){
